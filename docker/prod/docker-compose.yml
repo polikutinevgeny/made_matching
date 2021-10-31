@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: matching
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - "5432"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U matching" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  init:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    environment:
+      DATABASE_URL: "postgresql+psycopg2://matching:password@postgres:5432/matching"
+    depends_on:
+      postgres:
+        condition: service_started
+    volumes:
+      - ./data:/data
+    entrypoint: ["python", "-m", "matching.data_loader", "--input-dir", "/data"]
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    environment:
+      DATABASE_URL: "postgresql+psycopg2://matching:password@postgres:5432/matching"
+    depends_on:
+      postgres:
+        condition: service_started
+      init:
+        condition: service_completed_successfully
+    ports:
+      - "8080:80"
+
+volumes:
+    postgres:
+
