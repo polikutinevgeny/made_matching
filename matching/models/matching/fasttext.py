@@ -8,10 +8,11 @@ from sqlmodel import Session, select
 from tqdm import tqdm
 
 from matching.database import models
+from matching.env import N_PROCESS
 from matching.models.matching.main import MatchingModel
 
 nlp = spacy.load("ru_core_news_md")
-ft = fasttext.load_facebook_vectors("ft_native_300_ru_wiki_lenta_lemmatize.bin")
+ft = fasttext.FastTextKeyedVectors.load("fasttext.bin")
 
 
 def _build_vectors(documents: List[str], n_process=1) -> np.ndarray:
@@ -28,7 +29,7 @@ class FasttextMatchingModel(MatchingModel):
         self.product_ids = np.array([i.item_id for i in products])
         self.product_idx = np.arange(len(self.product_ids)).astype(np.int64)
         names = [i.name for i in products]
-        self.vectors = _build_vectors(names, n_process=16)
+        self.vectors = _build_vectors(names, n_process=N_PROCESS)
         faiss.normalize_L2(self.vectors)
         self.index = faiss.index_factory(self.vectors.shape[1], "IDMap,Flat")
         self.index.add_with_ids(self.vectors, self.product_idx)

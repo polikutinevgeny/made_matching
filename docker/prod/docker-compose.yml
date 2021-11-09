@@ -35,6 +35,8 @@ services:
       dockerfile: docker/api/Dockerfile
     environment:
       DATABASE_URL: "postgresql+psycopg2://matching:password@postgres:5432/matching"
+      N_PROCESS: 1
+      ENVIRONMENT: "PRODUCTION"
     depends_on:
       postgres:
         condition: service_started

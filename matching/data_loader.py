@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, Dict
 
 import click
+import sqlalchemy
 from sqlmodel import Session, select
 from tqdm import tqdm
 
@@ -107,11 +108,14 @@ def load_prices(path: Path):
 @click.command()
 @click.option("--input-dir", help="Directory with files to load", type=click.Path(path_type=Path))
 def load_files(input_dir: Path):
-    create_db_and_tables()
-    load_stores(input_dir / "stores.csv")
-    categories = load_categories(input_dir / "categories.csv")
-    load_products(input_dir / "products.csv", categories)
-    load_prices(input_dir / "prices.csv")
+    try:
+        create_db_and_tables()
+        load_stores(input_dir / "stores.csv")
+        categories = load_categories(input_dir / "categories.csv")
+        load_products(input_dir / "products.csv", categories)
+        load_prices(input_dir / "prices.csv")
+    except sqlalchemy.exc.IntegrityError as e:
+        print("Already loaded")
 
 
 if __name__ == '__main__':

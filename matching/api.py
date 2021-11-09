@@ -7,12 +7,21 @@ from sqlmodel import Session, select
 
 from matching.database import models
 from matching.database.main import create_db_and_tables, engine
-from matching.models.matching.fasttext import FasttextMatchingModel
-from matching.models.search.bm25 import BM25SearchModel
+from matching.env import ENVIRONMENT
+
+if ENVIRONMENT == "PRODUCTION":
+    from matching.models.matching.stub import StubMatchingModel as MatchingModel
+    from matching.models.search.stub import StubSearchModel as SearchModel
+
+elif ENVIRONMENT == "DEV":
+    from matching.models.matching.fasttext import FasttextMatchingModel as MatchingModel
+    from matching.models.search.bm25 import BM25SearchModel as SearchModel
+else:
+    raise RuntimeError()
 
 app = FastAPI()
-search_model: BM25SearchModel
-matching_model: FasttextMatchingModel
+search_model: SearchModel
+matching_model: MatchingModel
 
 logger = logging.getLogger("uvicorn")
 
@@ -29,10 +38,10 @@ def on_startup():
     create_db_and_tables()
     with Session(engine) as session:
         logger.info("Loading search index...")
-        search_model = BM25SearchModel(session)
+        search_model = SearchModel(session)
         logger.info("Search index loaded successfully")
         logger.info("Loading matching model...")
-        matching_model = FasttextMatchingModel(session)
+        matching_model = MatchingModel(session)
         logger.info("Matching model loaded successfully")
 
 
@@ -45,11 +54,3 @@ def search(
     search_results = search_model.search(name, max_n, session)
     all_results = matching_model.find(search_results, session)
     return all_results
-
-
-@app.get("/matches", response_model=List[models.Product])
-def get_matches(
-        product_id: int = Query(..., description="Product id to get matches for"),
-        session: Session = Depends(get_session),
-):
-    return [session.exec(select(models.Product).limit(1)).one(), ]

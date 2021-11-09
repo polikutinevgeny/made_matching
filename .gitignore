@@ -78,3 +78,4 @@ fabric.properties
 /data/products.csv
 /data/stores.csv
 /ft_native_300_ru_wiki_lenta_lemmatize.bin
+/fasttext.bin

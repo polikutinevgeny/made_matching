@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 from tqdm import tqdm
 
 from matching.database import models
+from matching.env import N_PROCESS
 from matching.models.search.main import SearchModel
 
 nlp = spacy.load("ru_core_news_md")
@@ -16,7 +17,7 @@ stemmer = Stemmer.Stemmer('russian')
 def _preprocess_documents(documents: List[str]) -> List[List[str]]:
     result = [
         stemmer.stemWords([token.lemma_ for token in document])
-        for document in tqdm(nlp.pipe(documents, batch_size=64, n_process=16, disable=["parser", "ner"]))
+        for document in tqdm(nlp.pipe(documents, batch_size=64, n_process=N_PROCESS, disable=["parser", "ner"]))
     ]
     return result
 
