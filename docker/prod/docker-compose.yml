@@ -10,25 +10,25 @@ services:
     volumes:
        - postgres:/data/postgres
     ports:
-      - "5432"
+      - "127.0.0.1:5432:5432"
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U matching" ]
       interval: 10s
       timeout: 5s
       retries: 5
-  init:
-    build:
-      context: .
-      dockerfile: docker/api/Dockerfile
-    environment:
-      DATABASE_URL: "postgresql+psycopg2://matching:password@postgres:5432/matching"
-    depends_on:
-      postgres:
-        condition: service_started
-    volumes:
-      - ./data:/data
-    entrypoint: ["python", "-m", "matching.data_loader", "--input-dir", "/data"]
+#  init:
+#    build:
+#      context: .
+#      dockerfile: docker/api/Dockerfile
+#    environment:
+#      DATABASE_URL: "postgresql+psycopg2://matching:password@postgres:5432/matching"
+#    depends_on:
+#      postgres:
+#        condition: service_started
+#    volumes:
+#      - ./data:/data
+#    entrypoint: ["python", "-m", "matching.data_loader", "--input-dir", "/data"]
   api:
     build:
       context: .
@@ -41,7 +41,7 @@ services:
       postgres:
         condition: service_started
       init:
-        condition: service_completed_successfully
+        condition: service_started
     ports:
       - "8080:80"
 

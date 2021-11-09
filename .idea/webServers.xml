@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="66c4a77b-8b02-4107-a966-9ea143c5fc6d" name="made-matching">
+        <fileTransfer rootFolder="/root" accessType="SFTP" host="128.199.54.236" port="22" sshConfigId="0db0d6f0-8b68-40a2-b0bf-228274f049cd" sshConfig="root@128.199.54.236:22 agent" authAgent="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

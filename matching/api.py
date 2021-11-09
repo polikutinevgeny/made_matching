@@ -35,7 +35,7 @@ def get_session():
 def on_startup():
     global search_model
     global matching_model
-    create_db_and_tables()
+    # create_db_and_tables()
     with Session(engine) as session:
         logger.info("Loading search index...")
         search_model = SearchModel(session)
