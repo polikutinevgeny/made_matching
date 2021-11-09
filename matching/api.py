@@ -4,6 +4,7 @@ import logging
 from fastapi import FastAPI, Query, Depends
 # noinspection PyUnresolvedReferences
 from sqlmodel import Session, select
+from pydantic import conint
 
 from matching.database import models
 from matching.database.main import create_db_and_tables, engine
@@ -48,7 +49,7 @@ def on_startup():
 @app.get("/search", response_model=List[List[models.Product]])
 def search(
         name: str = Query(..., description="String to search in product name"),
-        max_n: int = Query(..., description="Max number of results"),
+        max_n: conint(le=100) = Query(..., description="Max number of results"),
         session: Session = Depends(get_session),
 ):
     search_results = search_model.search(name, max_n, session)
