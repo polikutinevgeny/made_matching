@@ -5,6 +5,7 @@ from fastapi import FastAPI, Query, Depends
 # noinspection PyUnresolvedReferences
 from sqlmodel import Session, select
 from pydantic import conint
+from fastapi.middleware.cors import CORSMiddleware
 
 from matching.database import models
 from matching.database.main import create_db_and_tables, engine
@@ -25,6 +26,14 @@ search_model: SearchModel
 matching_model: MatchingModel
 
 logger = logging.getLogger("uvicorn")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def get_session():
