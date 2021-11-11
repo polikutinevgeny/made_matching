@@ -33,6 +33,7 @@ services:
     build:
       context: .
       dockerfile: docker/api/Dockerfile
+    restart: always
     environment:
       DATABASE_URL: "postgresql+psycopg2://matching:password@postgres:5432/matching"
       N_PROCESS: 1
@@ -40,9 +41,24 @@ services:
     depends_on:
       postgres:
         condition: service_started
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.app-http.rule=Host(`made-matching.tech`, `www.made-matching.tech`)
+      - traefik.http.services.my_custom_image.loadbalancer.server.port=80
+      - traefik.http.routers.app-http.tls=true
+      - traefik.http.routers.app-http.tls.certresolver=letsencrypt
+
+  traefik:
+    image: traefik:v2.3
     ports:
-      - "8080:80"
+      - "80:80"
+      - "443:443"
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - $PWD/docker/traefik/traefik.toml:/etc/traefik/traefik.toml
+      - traefik-public-certificates:/certificates
 
 volumes:
     postgres:
-
+    traefik-public-certificates:
