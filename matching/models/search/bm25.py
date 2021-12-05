@@ -1,4 +1,6 @@
-from typing import List
+from pathlib import Path
+from typing import List, Union
+import pickle
 
 import spacy
 import Stemmer
@@ -34,3 +36,12 @@ class BM25SearchModel(SearchModel):
         item_ids = self.index.get_top_n(query, self.product_ids, max_n)
         results = session.exec(select(models.Product).where(models.Product.item_id.in_(item_ids))).fetchall()
         return results
+
+    def save(self, path: Union[Path, str]):
+        with open(path, "wb") as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load(cls, path: Union[Path, str]) -> "BM25SearchModel":
+        with open(path, "rb") as f:
+            return pickle.load(f)

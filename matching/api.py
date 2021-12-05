@@ -9,20 +9,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from matching.database import models
 from matching.database.main import create_db_and_tables, engine
-from matching.env import ENVIRONMENT
+from matching.models.search.bm25 import BM25SearchModel
+from matching.env import ENVIRONMENT, BM25_PATH
 
 if ENVIRONMENT == "PRODUCTION":
     from matching.models.matching.stub import StubMatchingModel as MatchingModel
-    from matching.models.search.stub import StubSearchModel as SearchModel
-
 elif ENVIRONMENT == "DEV":
     from matching.models.matching.fasttext import FasttextMatchingModel as MatchingModel
-    from matching.models.search.bm25 import BM25SearchModel as SearchModel
 else:
     raise RuntimeError()
 
 app = FastAPI()
-search_model: SearchModel
+search_model: BM25SearchModel
 matching_model: MatchingModel
 
 logger = logging.getLogger("uvicorn")
@@ -48,7 +46,7 @@ def on_startup():
     # create_db_and_tables()
     with Session(engine) as session:
         logger.info("Loading search index...")
-        search_model = SearchModel(session)
+        search_model = BM25SearchModel.load(BM25_PATH)
         logger.info("Search index loaded successfully")
         logger.info("Loading matching model...")
         matching_model = MatchingModel(session)
