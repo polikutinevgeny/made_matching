@@ -12,6 +12,8 @@ COPY ./fasttext.bin /fasttext.bin
 
 COPY ./cache/bm25.pickle /cache/bm25.pickle
 
+COPY ./match_files/* /match_files/
+
 COPY ./matching /matching
 
 CMD ["gunicorn", "matching.api:app", "--workers", "2", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:80", "--timeout", "0"]
